@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petty Cash Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for loader */
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Petty Cash Hub</h1>
+            <p class="text-gray-500">A simple way to track your cash flow.</p>
+        </header>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center items-center">
+                <h2 class="text-lg font-semibold text-gray-500 mb-2">Current Balance</h2>
+                <p id="currentBalance" class="text-3xl font-bold text-blue-600">RM 0.00</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center items-center">
+                <h2 class="text-lg font-semibold text-gray-500 mb-2">Total In</h2>
+                <p id="totalIn" class="text-3xl font-bold text-green-500">RM 0.00</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center items-center">
+                <h2 class="text-lg font-semibold text-gray-500 mb-2">Total Out</h2>
+                <p id="totalOut" class="text-3xl font-bold text-red-500">RM 0.00</p>
+            </div>
+        </section>
+
+        <!-- Form Section -->
+        <section id="form-section" class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h2 class="text-2xl font-bold mb-4">Add New Transaction</h2>
+            <form id="cashForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Transaction Type -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Type</label>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="type" value="Cash In" class="form-radio h-4 w-4 text-green-600" checked>
+                                <span class="ml-2 text-gray-700">Cash In</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="type" value="Cash Out" class="form-radio h-4 w-4 text-red-600">
+                                <span class="ml-2 text-gray-700">Cash Out</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Date -->
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" id="date" name="date" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+
+                    <!-- Amount -->
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700">Amount (RM)</label>
+                        <input type="number" id="amount" name="amount" step="0.01" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <input type="text" id="description" name="description" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+
+                    <!-- Receipt Upload -->
+                    <div class="md:col-span-2">
+                        <label for="receipt" class="block text-sm font-medium text-gray-700">Scan/Upload Receipt</label>
+                        <input type="file" id="receipt" name="receipt" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    </div>
+                </div>
+                <div class="mt-6 text-right">
+                    <button type="submit" id="submitButton" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span id="buttonText">Add Transaction</span>
+                        <div id="buttonLoader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-5 w-5 ml-2 hidden"></div>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Transaction Log -->
+        <section id="log-section" class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-bold mb-4">Transaction History</h2>
+            <div id="logLoader" class="flex justify-center items-center py-8">
+                 <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="transactionTable" class="min-w-full divide-y divide-gray-200 hidden">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionLog" class="bg-white divide-y divide-gray-200">
+                        <!-- Rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+                 <p id="no-transactions" class="text-center text-gray-500 py-8 hidden">No transactions found.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Receipt</h3>
+                    <div class="mt-4">
+                        <img id="modalImage" src="" alt="Receipt Image" class="w-full h-auto rounded-md">
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="closeModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg hidden transition-opacity duration-300">
+        <p id="toast-message"></p>
+    </div>
+
+
+    <script>
+        // ===================================================================================
+        // IMPORTANT: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+        // ===================================================================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNFGeS012q6q1sq-t4kZyvQTXZd3eNoCVGXJcO-n_mde4M4ot-1EI_3bvEgZAtHLz0Sg/exec';
+        // Example: const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/ABC.../exec';
+        // ===================================================================================
+
+        // DOM Elements
+        const form = document.getElementById('cashForm');
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const buttonLoader = document.getElementById('buttonLoader');
+        const logLoader = document.getElementById('logLoader');
+        const transactionTable = document.getElementById('transactionTable');
+        const transactionLog = document.getElementById('transactionLog');
+        const noTransactionsMessage = document.getElementById('no-transactions');
+        const currentBalanceEl = document.getElementById('currentBalance');
+        const totalInEl = document.getElementById('totalIn');
+        const totalOutEl = document.getElementById('totalOut');
+        const modal = document.getElementById('receiptModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModalButton = document.getElementById('closeModal');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const dateInput = document.getElementById('date');
+        
+        // Set default date to today
+        dateInput.valueAsDate = new Date();
+
+        // Show a toast notification
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden', 'bg-red-600', 'bg-gray-800');
+            toast.classList.add(isError ? 'bg-red-600' : 'bg-gray-800');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Form Submission Handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!GOOGLE_SCRIPT_URL) {
+                showToast('Error: Google Apps Script URL is not set.', true);
+                return;
+            }
+
+            buttonText.classList.add('hidden');
+            buttonLoader.classList.remove('hidden');
+            submitButton.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            const file = formData.get('receipt');
+            if (file && file.size > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    data.receipt = {
+                        base64: event.target.result.split(',')[1], // Get Base64 part
+                        type: file.type,
+                        name: file.name
+                    };
+                    sendData(data);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                data.receipt = null;
+                sendData(data);
+            }
+        });
+
+        // Function to send data to Google Apps Script
+        async function sendData(data) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Use no-cors for simple requests to avoid CORS preflight
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    redirect: 'follow',
+                    body: JSON.stringify(data)
+                });
+                
+                showToast('Transaction added successfully!');
+                form.reset();
+                dateInput.valueAsDate = new Date(); // Reset date to today
+                fetchTransactions(); // Refresh data
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error adding transaction.', true);
+            } finally {
+                buttonText.classList.remove('hidden');
+                buttonLoader.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        }
+
+        // Fetch and display transactions
+        async function fetchTransactions() {
+            if (!GOOGLE_SCRIPT_URL) {
+                logLoader.classList.add('hidden');
+                noTransactionsMessage.classList.remove('hidden');
+                noTransactionsMessage.textContent = 'Please configure the Google Apps Script URL first.';
+                return;
+            }
+            
+            logLoader.classList.remove('hidden');
+            transactionTable.classList.add('hidden');
+            noTransactionsMessage.classList.add('hidden');
+
+            try {
+                // Using a GET request to a different endpoint function for reading data
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
+                const data = await response.json();
+                
+                if (data.error) {
+                   throw new Error(data.error);
+                }
+
+                updateDashboard(data.records);
+                populateTable(data.records);
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showToast('Could not fetch data from Google Sheet.', true);
+                noTransactionsMessage.textContent = 'Error loading transactions.';
+                noTransactionsMessage.classList.remove('hidden');
+            } finally {
+                logLoader.classList.add('hidden');
+            }
+        }
+
+        // Update the dashboard with calculated totals
+        function updateDashboard(records) {
+            let totalIn = 0;
+            let totalOut = 0;
+
+            records.forEach(record => {
+                const amount = parseFloat(record[2]); // Amount is at index 2
+                const type = record[3]; // Type is at index 3
+
+                if (type === 'Cash In') {
+                    totalIn += amount;
+                } else if (type === 'Cash Out') {
+                    totalOut += amount;
+                }
+            });
+
+            const currentBalance = totalIn - totalOut;
+
+            currentBalanceEl.textContent = `RM ${currentBalance.toFixed(2)}`;
+            totalInEl.textContent = `RM ${totalIn.toFixed(2)}`;
+            totalOutEl.textContent = `RM ${totalOut.toFixed(2)}`;
+        }
+
+        // Populate the transaction table
+        function populateTable(records) {
+            transactionLog.innerHTML = ''; // Clear existing rows
+
+            if (records.length === 0) {
+                noTransactionsMessage.classList.remove('hidden');
+                transactionTable.classList.add('hidden');
+                return;
+            }
+            
+            noTransactionsMessage.classList.add('hidden');
+            transactionTable.classList.remove('hidden');
+
+            records.reverse().forEach(record => {
+                const [timestamp, date, amount, type, description, receiptUrl] = record;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+
+                // Make row clickable if there's a receipt
+                if (receiptUrl) {
+                    row.classList.add('cursor-pointer');
+                    row.addEventListener('click', () => {
+                        modalImage.src = receiptUrl;
+                        modal.classList.remove('hidden');
+                    });
+                }
+
+                const formattedDate = new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                const formattedAmount = parseFloat(amount).toFixed(2);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${type === 'Cash In' ? 'text-green-600' : 'text-red-600'}">RM ${formattedAmount}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${type}</td>
+                `;
+                transactionLog.appendChild(row);
+            });
+        }
+
+        // Modal close functionality
+        closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+             if (e.target === modal) {
+                 modal.classList.add('hidden');
+             }
+        });
+
+        // Initial data load
+        document.addEventListener('DOMContentLoaded', fetchTransactions);
+    </script>
+</body>
+</html>
