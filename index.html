@@ -28,7 +28,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
         <header class="mb-8">
             <h1 class="text-4xl font-bold text-gray-800">Petty Cash Hub</h1>
             <p class="text-gray-500">A simple way to track your cash flow.</p>
@@ -81,6 +81,47 @@
                         <label for="amount" class="block text-sm font-medium text-gray-700">Amount (RM)</label>
                         <input type="number" id="amount" name="amount" step="0.01" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
                     </div>
+                    
+                    <!-- Company -->
+                    <div>
+                        <label for="company" class="block text-sm font-medium text-gray-700">Company / Department</label>
+                         <select id="company" name="company" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option>Rubix</option>
+                            <option>Asiah & Hisam</option>
+                            <option>TreeBrothers</option>
+                            <option>AFC</option>
+                            <option>Ana Travel</option>
+                            <option>AUEI</option>
+                        </select>
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" name="category" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option>SOFTWARE / HARDWARE</option>
+                            <option>EVENT</option>
+                            <option>FOOD BANK</option>
+                            <option>OFFICE SUPPLIES</option>
+                            <option>TOILETRIES</option>
+                            <option>PRINTING & STATIONERY</option>
+                            <option>REFRESHMENT</option>
+                            <option>SEMINAR & TRAINING</option>
+                            <option>STUDIO EQUIPMENT</option>
+                            <option>TRANSPORTATION</option>
+                            <option>UTILITIES</option>
+                            <option>MARKETING</option>
+                            <option>MAINTENANCE</option>
+                            <option>MISCELLANEOUS</option>
+                        </select>
+                    </div>
+
+                    <!-- Pay To -->
+                    <div class="md:col-span-2">
+                        <label for="payTo" class="block text-sm font-medium text-gray-700">Pay To</label>
+                        <input type="text" id="payTo" name="payTo" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+
 
                     <!-- Description -->
                     <div class="md:col-span-2">
@@ -114,6 +155,9 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay To</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
@@ -314,7 +358,7 @@
             transactionTable.classList.remove('hidden');
 
             records.reverse().forEach(record => {
-                const [timestamp, date, amount, type, description, receiptUrl] = record;
+                const [timestamp, date, amount, type, company, category, payTo, description, receiptUrl] = record;
                 const row = transactionLog.insertRow();
 
                 const formattedDate = new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -322,6 +366,9 @@
                 
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${company || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${category || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${payTo || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${description}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${type === 'Cash In' ? 'text-green-600' : 'text-red-600'}">RM ${formattedAmount}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${type}</td>
@@ -329,7 +376,7 @@
                 `;
 
                 if (receiptUrl) {
-                    const receiptCell = row.cells[4];
+                    const receiptCell = row.cells[7];
                     const viewButton = document.createElement('button');
                     viewButton.textContent = 'View';
                     viewButton.className = 'text-indigo-600 hover:text-indigo-900';
