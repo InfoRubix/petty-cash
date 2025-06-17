@@ -10,20 +10,13 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom styles for loader */
         .loader {
             border-top-color: #3498db;
             -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
-        @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -59,14 +52,8 @@
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Type</label>
                         <div class="flex items-center space-x-4">
-                            <label class="flex items-center">
-                                <input type="radio" name="type" value="Cash In" class="form-radio h-4 w-4 text-green-600" checked>
-                                <span class="ml-2 text-gray-700">Cash In</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="type" value="Cash Out" class="form-radio h-4 w-4 text-red-600">
-                                <span class="ml-2 text-gray-700">Cash Out</span>
-                            </label>
+                            <label class="flex items-center"><input type="radio" name="type" value="Cash In" class="form-radio h-4 w-4 text-green-600" checked><span class="ml-2 text-gray-700">Cash In</span></label>
+                            <label class="flex items-center"><input type="radio" name="type" value="Cash Out" class="form-radio h-4 w-4 text-red-600"><span class="ml-2 text-gray-700">Cash Out</span></label>
                         </div>
                     </div>
                     
@@ -84,18 +71,16 @@
                     
                     <!-- Company -->
                     <div>
-                        <label for="company" class="block text-sm font-medium text-gray-700">Company / Department</label>
-                         <select id="company" name="company" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
-                            <option>Loading Companies...</option>
-                        </select>
+                        <label for="company-input" class="block text-sm font-medium text-gray-700">Company / Department</label>
+                        <input list="company-list" id="company-input" name="company" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Select or type to add..." required>
+                        <datalist id="company-list"></datalist>
                     </div>
 
                     <!-- Category -->
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                        <select id="category" name="category" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
-                            <option>Loading Categories...</option>
-                        </select>
+                        <label for="category-input" class="block text-sm font-medium text-gray-700">Category</label>
+                        <input list="category-list" id="category-input" name="category" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Select or type to add..." required>
+                        <datalist id="category-list"></datalist>
                     </div>
 
                     <!-- Pay To -->
@@ -103,7 +88,6 @@
                         <label for="payTo" class="block text-sm font-medium text-gray-700">Pay To</label>
                         <input type="text" id="payTo" name="payTo" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
                     </div>
-
 
                     <!-- Description -->
                     <div class="md:col-span-2">
@@ -129,288 +113,106 @@
         <!-- Transaction Log -->
         <section id="log-section" class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-2xl font-bold mb-4">Transaction History</h2>
-            <div id="logLoader" class="flex justify-center items-center py-8">
-                 <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
-            </div>
-            <div class="overflow-x-auto">
-                <table id="transactionTable" class="min-w-full divide-y divide-gray-200 hidden">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay To</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionLog" class="bg-white divide-y divide-gray-200">
-                    </tbody>
-                </table>
-                 <p id="no-transactions" class="text-center text-gray-500 py-8 hidden">No transactions found.</p>
-            </div>
+            <div id="logLoader" class="flex justify-center items-center py-8"><div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div></div>
+            <div class="overflow-x-auto"><table id="transactionTable" class="min-w-full divide-y divide-gray-200 hidden"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay To</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th></tr></thead><tbody id="transactionLog" class="bg-white divide-y divide-gray-200"></tbody></table><p id="no-transactions" class="text-center text-gray-500 py-8 hidden">No transactions found.</p></div>
         </section>
-
     </div>
 
-    <!-- Receipt Modal for Images -->
-    <div id="receiptModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Receipt</h3>
-                    <div class="mt-4">
-                        <img id="modalImage" src="" alt="Receipt Image" class="w-full h-auto rounded-md">
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="closeModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="fixed z-10 inset-0 overflow-y-auto hidden"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><h3 class="text-lg leading-6 font-medium text-gray-900">Receipt</h3><div class="mt-4"><img id="modalImage" src="" alt="Receipt Image" class="w-full h-auto rounded-md"></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="closeModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Close</button></div></div></div></div>
     
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg hidden transition-opacity duration-300">
-        <p id="toast-message"></p>
-    </div>
-
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg hidden"><p id="toast-message"></p></div>
 
     <script>
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNFGeS012q6q1sq-t4kZyvQTXZd3eNoCVGXJcO-n_mde4M4ot-1EI_3bvEgZAtHLz0Sg/exec';
 
-        // DOM Elements
-        const form = document.getElementById('cashForm');
-        const submitButton = document.getElementById('submitButton');
-        const buttonText = document.getElementById('buttonText');
-        const buttonLoader = document.getElementById('buttonLoader');
-        const logLoader = document.getElementById('logLoader');
-        const transactionTable = document.getElementById('transactionTable');
-        const transactionLog = document.getElementById('transactionLog');
-        const noTransactionsMessage = document.getElementById('no-transactions');
-        const currentBalanceEl = document.getElementById('currentBalance');
-        const totalInEl = document.getElementById('totalIn');
-        const totalOutEl = document.getElementById('totalOut');
-        const modal = document.getElementById('receiptModal');
-        const modalImage = document.getElementById('modalImage');
-        const closeModalButton = document.getElementById('closeModal');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-message');
-        const dateInput = document.getElementById('date');
-        const companySelect = document.getElementById('company');
-        const categorySelect = document.getElementById('category');
+        const form = document.getElementById('cashForm'), submitButton = document.getElementById('submitButton'), buttonText = document.getElementById('buttonText'), buttonLoader = document.getElementById('buttonLoader'), logLoader = document.getElementById('logLoader'), transactionTable = document.getElementById('transactionTable'), transactionLog = document.getElementById('transactionLog'), noTransactionsMessage = document.getElementById('no-transactions'), currentBalanceEl = document.getElementById('currentBalance'), totalInEl = document.getElementById('totalIn'), totalOutEl = document.getElementById('totalOut'), modal = document.getElementById('receiptModal'), modalImage = document.getElementById('modalImage'), closeModalButton = document.getElementById('closeModal'), toast = document.getElementById('toast'), toastMessage = document.getElementById('toast-message'), dateInput = document.getElementById('date'), companyDatalist = document.getElementById('company-list'), categoryDatalist = document.getElementById('category-list');
         
         dateInput.valueAsDate = new Date();
 
         function showToast(message, isError = false) {
             toastMessage.textContent = message;
-            toast.classList.remove('hidden', 'bg-red-600', 'bg-gray-800');
-            toast.classList.add(isError ? 'bg-red-600' : 'bg-gray-800');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg ${isError ? 'bg-red-600' : 'bg-gray-800'}`;
+            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
         }
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', e => {
             e.preventDefault();
-            if (!GOOGLE_SCRIPT_URL) {
-                showToast('Error: Google Apps Script URL is not set.', true);
-                return;
-            }
-
-            buttonText.classList.add('hidden');
-            buttonLoader.classList.remove('hidden');
-            submitButton.disabled = true;
-
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
+            if (!GOOGLE_SCRIPT_URL) { showToast('Error: Google Apps Script URL is not set.', true); return; }
+            buttonText.classList.add('hidden'); buttonLoader.classList.remove('hidden'); submitButton.disabled = true;
+            const formData = new FormData(form); const data = Object.fromEntries(formData.entries());
             const file = formData.get('receipt');
             if (file && file.size > 0) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    data.receipt = {
-                        base64: event.target.result.split(',')[1],
-                        type: file.type,
-                        name: file.name
-                    };
-                    sendData(data);
-                };
+                reader.onload = event => { data.receipt = { base64: event.target.result.split(',')[1], type: file.type, name: file.name }; sendData(data); };
                 reader.readAsDataURL(file);
-            } else {
-                data.receipt = null;
-                sendData(data);
-            }
+            } else { data.receipt = null; sendData(data); }
         });
 
         async function sendData(data) {
             try {
-                // Use 'text' mode to handle simple "success" string from no-cors POST
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(data)
-                });
-                
-                showToast('Transaction added successfully!');
-                form.reset();
-                dateInput.valueAsDate = new Date();
-                fetchAllData(); // Refresh all data
+                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+                showToast('Transaction added successfully!'); form.reset(); dateInput.valueAsDate = new Date(); fetchAllData();
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error adding transaction.', true);
+                console.error('Error:', error); showToast('Error adding transaction.', true);
             } finally {
-                buttonText.classList.remove('hidden');
-                buttonLoader.classList.add('hidden');
-                submitButton.disabled = false;
+                buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); submitButton.disabled = false;
             }
         }
         
-        function populateSelect(selectElement, options, placeholder) {
-            selectElement.innerHTML = `<option value="">-- Select ${placeholder} --</option>`;
-            options.forEach(option => {
-                if(option) { // Ensure option is not empty
-                    const opt = document.createElement('option');
-                    opt.value = option;
-                    opt.textContent = option;
-                    selectElement.appendChild(opt);
-                }
-            });
+        function populateDatalist(datalistElement, options) {
+            datalistElement.innerHTML = '';
+            options.forEach(option => { if(option) { const opt = document.createElement('option'); opt.value = option; datalistElement.appendChild(opt); } });
         }
         
         async function fetchAllData() {
-            if (!GOOGLE_SCRIPT_URL) {
-                logLoader.classList.add('hidden');
-                noTransactionsMessage.classList.remove('hidden');
-                noTransactionsMessage.textContent = 'Please configure the Google Apps Script URL first.';
-                return;
-            }
-            
-            logLoader.classList.remove('hidden');
-            transactionTable.classList.add('hidden');
-            noTransactionsMessage.classList.add('hidden');
-
+            if (!GOOGLE_SCRIPT_URL) { logLoader.classList.add('hidden'); noTransactionsMessage.classList.remove('hidden'); noTransactionsMessage.textContent = 'Please configure the Google Apps Script URL first.'; return; }
+            logLoader.classList.remove('hidden'); transactionTable.classList.add('hidden'); noTransactionsMessage.classList.add('hidden');
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=readAll`);
                 const data = await response.json();
-                
-                if (data.error) {
-                   throw new Error(data.error);
-                }
-                
-                // Populate dropdowns
-                populateSelect(companySelect, data.companies, 'Company');
-                populateSelect(categorySelect, data.categories, 'Category');
-
-                // Populate transactions
-                updateDashboard(data.transactions);
-                populateTable(data.transactions);
-
+                if (data.error) throw new Error(data.error);
+                populateDatalist(companyDatalist, data.companies); populateDatalist(categoryDatalist, data.categories);
+                updateDashboard(data.transactions); populateTable(data.transactions);
             } catch (error) {
-                console.error('Fetch Error:', error);
-                showToast('Could not fetch data from Google Sheet.', true);
-                noTransactionsMessage.textContent = 'Error loading transactions.';
-                noTransactionsMessage.classList.remove('hidden');
+                console.error('Fetch Error:', error); showToast('Could not fetch data from Google Sheet.', true);
+                noTransactionsMessage.textContent = 'Error loading transactions.'; noTransactionsMessage.classList.remove('hidden');
             } finally {
                 logLoader.classList.add('hidden');
             }
         }
 
         function updateDashboard(transactions) {
-            let totalIn = 0;
-            let totalOut = 0;
-
+            let totalIn = 0, totalOut = 0;
             transactions.forEach(record => {
-                // Determine amount index based on record length (for backward compatibility)
-                const isNewFormat = record.length > 6;
-                const amountIndex = 2; // Amount is always at index 2
-                const typeIndex = 3; // Type is always at index 3
-
-                const amount = parseFloat(record[amountIndex]) || 0;
-                const type = record[typeIndex];
-                
-                if (type === 'Cash In') totalIn += amount;
-                else if (type === 'Cash Out') totalOut += amount;
+                const amount = parseFloat(record[2]) || 0, type = record[3];
+                if (type === 'Cash In') totalIn += amount; else if (type === 'Cash Out') totalOut += amount;
             });
-
-            currentBalanceEl.textContent = `RM ${totalIn.toFixed(2)}`;
-            totalInEl.textContent = `RM ${totalIn.toFixed(2)}`;
-            totalOutEl.textContent = `RM ${(totalOut).toFixed(2)}`;
+            currentBalanceEl.textContent = `RM ${totalIn.toFixed(2)}`; totalInEl.textContent = `RM ${totalIn.toFixed(2)}`; totalOutEl.textContent = `RM ${(totalOut).toFixed(2)}`;
         }
 
         function populateTable(transactions) {
             transactionLog.innerHTML = '';
-
-            if (transactions.length === 0) {
-                noTransactionsMessage.classList.remove('hidden');
-                transactionTable.classList.add('hidden');
-                return;
-            }
-            
-            noTransactionsMessage.classList.add('hidden');
-            transactionTable.classList.remove('hidden');
-
+            if (transactions.length === 0) { noTransactionsMessage.classList.remove('hidden'); transactionTable.classList.add('hidden'); return; }
+            noTransactionsMessage.classList.add('hidden'); transactionTable.classList.remove('hidden');
             transactions.slice().reverse().forEach(record => {
-                const row = transactionLog.insertRow();
-                
                 const isNewFormat = record.length > 8;
-                
-                let timestamp, date, amount, type, company, category, payTo, description, receiptUrl;
-                
-                // This logic handles both old and new data formats
-                if (isNewFormat) {
-                    [timestamp, date, amount, type, company, category, payTo, description, receiptUrl] = record;
-                } else {
-                    [timestamp, date, amount, type, description, receiptUrl] = record;
-                    company = category = payTo = 'N/A'; // Default for old records
-                }
-
-
+                let [timestamp, date, amount, type, company, category, payTo, description, receiptUrl] = isNewFormat ? record : [...record.slice(0, 4), 'N/A', 'N/A', 'N/A', ...record.slice(4)];
+                const row = transactionLog.insertRow();
                 const formattedDate = new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                const formattedAmount = parseFloat(amount || 0).toFixed(2);
-                
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${company || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${category || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${payTo || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${description || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${type === 'Cash In' ? 'text-green-600' : 'text-red-600'}">RM ${formattedAmount}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${type || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"></td>
-                `;
-
+                row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${company || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${category || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${payTo || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${description || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${type === 'Cash In' ? 'text-green-600' : 'text-red-600'}">RM ${(parseFloat(amount) || 0).toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${type || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-medium"></td>`;
                 if (receiptUrl) {
-                    const receiptCell = row.cells[7]; // The last cell
-                    const viewButton = document.createElement('button');
-                    viewButton.textContent = 'View';
-                    viewButton.className = 'text-indigo-600 hover:text-indigo-900';
-                    
-                    viewButton.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (receiptUrl.includes('uc?export=view')) {
-                            modalImage.src = receiptUrl;
-                            modal.classList.remove('hidden');
-                        } else {
-                            window.open(receiptUrl, '_blank');
-                        }
-                    });
+                    const receiptCell = row.cells[7], viewButton = document.createElement('button');
+                    viewButton.textContent = 'View'; viewButton.className = 'text-indigo-600 hover:text-indigo-900';
+                    viewButton.addEventListener('click', e => { e.stopPropagation(); if (receiptUrl.includes('uc?export=view')) { modalImage.src = receiptUrl; modal.classList.remove('hidden'); } else { window.open(receiptUrl, '_blank'); } });
                     receiptCell.appendChild(viewButton);
                 }
             });
         }
 
         closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-             if (e.target === modal) modal.classList.add('hidden');
-        });
-
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
         document.addEventListener('DOMContentLoaded', fetchAllData);
     </script>
 </body>
