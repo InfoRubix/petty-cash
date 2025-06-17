@@ -90,8 +90,8 @@
 
                     <!-- Receipt Upload -->
                     <div class="md:col-span-2">
-                        <label for="receipt" class="block text-sm font-medium text-gray-700">Scan/Upload Receipt</label>
-                        <input type="file" id="receipt" name="receipt" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <label for="receipt" class="block text-sm font-medium text-gray-700">Scan/Upload Receipt (Image or PDF)</label>
+                        <input type="file" id="receipt" name="receipt" accept="image/*,application/pdf" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                     </div>
                 </div>
                 <div class="mt-6 text-right">
@@ -117,6 +117,7 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
                         </tr>
                     </thead>
                     <tbody id="transactionLog" class="bg-white divide-y divide-gray-200">
@@ -129,7 +130,7 @@
 
     </div>
 
-    <!-- Receipt Modal -->
+    <!-- Receipt Modal for Images -->
     <div id="receiptModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
@@ -161,7 +162,6 @@
         // IMPORTANT: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
         // ===================================================================================
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNFGeS012q6q1sq-t4kZyvQTXZd3eNoCVGXJcO-n_mde4M4ot-1EI_3bvEgZAtHLz0Sg/exec';
-        // Example: const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/ABC.../exec';
         // ===================================================================================
 
         // DOM Elements
@@ -183,10 +183,8 @@
         const toastMessage = document.getElementById('toast-message');
         const dateInput = document.getElementById('date');
         
-        // Set default date to today
         dateInput.valueAsDate = new Date();
 
-        // Show a toast notification
         function showToast(message, isError = false) {
             toastMessage.textContent = message;
             toast.classList.remove('hidden', 'bg-red-600', 'bg-gray-800');
@@ -196,7 +194,6 @@
             }, 3000);
         }
 
-        // Form Submission Handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!GOOGLE_SCRIPT_URL) {
@@ -216,7 +213,7 @@
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     data.receipt = {
-                        base64: event.target.result.split(',')[1], // Get Base64 part
+                        base64: event.target.result.split(',')[1],
                         type: file.type,
                         name: file.name
                     };
@@ -229,12 +226,11 @@
             }
         });
 
-        // Function to send data to Google Apps Script
         async function sendData(data) {
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Use no-cors for simple requests to avoid CORS preflight
+                    mode: 'no-cors',
                     cache: 'no-cache',
                     headers: { 'Content-Type': 'application/json' },
                     redirect: 'follow',
@@ -243,8 +239,8 @@
                 
                 showToast('Transaction added successfully!');
                 form.reset();
-                dateInput.valueAsDate = new Date(); // Reset date to today
-                fetchTransactions(); // Refresh data
+                dateInput.valueAsDate = new Date();
+                fetchTransactions();
             } catch (error) {
                 console.error('Error:', error);
                 showToast('Error adding transaction.', true);
@@ -255,7 +251,6 @@
             }
         }
 
-        // Fetch and display transactions
         async function fetchTransactions() {
             if (!GOOGLE_SCRIPT_URL) {
                 logLoader.classList.add('hidden');
@@ -269,7 +264,6 @@
             noTransactionsMessage.classList.add('hidden');
 
             try {
-                // Using a GET request to a different endpoint function for reading data
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
                 const data = await response.json();
                 
@@ -290,32 +284,25 @@
             }
         }
 
-        // Update the dashboard with calculated totals
         function updateDashboard(records) {
             let totalIn = 0;
             let totalOut = 0;
 
             records.forEach(record => {
-                const amount = parseFloat(record[2]); // Amount is at index 2
-                const type = record[3]; // Type is at index 3
-
-                if (type === 'Cash In') {
-                    totalIn += amount;
-                } else if (type === 'Cash Out') {
-                    totalOut += amount;
-                }
+                const amount = parseFloat(record[2]);
+                const type = record[3];
+                if (type === 'Cash In') totalIn += amount;
+                else if (type === 'Cash Out') totalOut += amount;
             });
 
             const currentBalance = totalIn - totalOut;
-
             currentBalanceEl.textContent = `RM ${currentBalance.toFixed(2)}`;
             totalInEl.textContent = `RM ${totalIn.toFixed(2)}`;
             totalOutEl.textContent = `RM ${totalOut.toFixed(2)}`;
         }
 
-        // Populate the transaction table
         function populateTable(records) {
-            transactionLog.innerHTML = ''; // Clear existing rows
+            transactionLog.innerHTML = '';
 
             if (records.length === 0) {
                 noTransactionsMessage.classList.remove('hidden');
@@ -328,18 +315,7 @@
 
             records.reverse().forEach(record => {
                 const [timestamp, date, amount, type, description, receiptUrl] = record;
-
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-
-                // Make row clickable if there's a receipt
-                if (receiptUrl) {
-                    row.classList.add('cursor-pointer');
-                    row.addEventListener('click', () => {
-                        modalImage.src = receiptUrl;
-                        modal.classList.remove('hidden');
-                    });
-                }
+                const row = transactionLog.insertRow();
 
                 const formattedDate = new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                 const formattedAmount = parseFloat(amount).toFixed(2);
@@ -349,20 +325,35 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${description}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${type === 'Cash In' ? 'text-green-600' : 'text-red-600'}">RM ${formattedAmount}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"></td>
                 `;
-                transactionLog.appendChild(row);
+
+                if (receiptUrl) {
+                    const receiptCell = row.cells[4];
+                    const viewButton = document.createElement('button');
+                    viewButton.textContent = 'View';
+                    viewButton.className = 'text-indigo-600 hover:text-indigo-900';
+                    
+                    viewButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // If it's an image, open the modal. Otherwise, open in a new tab.
+                        if (receiptUrl.includes('uc?export=view')) {
+                            modalImage.src = receiptUrl;
+                            modal.classList.remove('hidden');
+                        } else {
+                            window.open(receiptUrl, '_blank');
+                        }
+                    });
+                    receiptCell.appendChild(viewButton);
+                }
             });
         }
 
-        // Modal close functionality
         closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
         modal.addEventListener('click', (e) => {
-             if (e.target === modal) {
-                 modal.classList.add('hidden');
-             }
+             if (e.target === modal) modal.classList.add('hidden');
         });
 
-        // Initial data load
         document.addEventListener('DOMContentLoaded', fetchTransactions);
     </script>
 </body>
