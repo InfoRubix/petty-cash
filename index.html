@@ -107,7 +107,7 @@
         const currentBalanceEl = document.getElementById('currentBalance');
         const totalInEl = document.getElementById('totalIn');
         const totalOutEl = document.getElementById('totalOut');
-        const modal = document.getElementById('receiptModal');
+        const receiptModal = document.getElementById('receiptModal');
         const modalImage = document.getElementById('modalImage');
         const deleteConfirmModal = document.getElementById('deleteConfirmModal');
         const cancelDeleteBtn = document.getElementById('cancelDelete');
@@ -179,7 +179,7 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error);
                 
-                allTransactions = data.transactions; // Store for reporting
+                allTransactions = data.transactions;
                 
                 populateDatalist(companyDatalist, data.companies);
                 populateDatalist(categoryDatalist, data.categories);
@@ -219,111 +219,60 @@
         function generateReport() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
+            if (!startDate || !endDate) { showToast("Please select both a start and end date.", true); return; }
 
-            if (!startDate || !endDate) {
-                showToast("Please select both a start and end date.", true);
-                return;
-            }
-
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999); // Include the entire end day
-
-            const transactionsInPeriod = allTransactions.filter(t => {
-                const transDate = new Date(t[1]);
-                return transDate >= start && transDate <= end;
-            });
-
-            const transactionsBeforePeriod = allTransactions.filter(t => {
-                 const transDate = new Date(t[1]);
-                 return transDate < start;
-            });
+            const start = new Date(startDate); const end = new Date(endDate); end.setHours(23, 59, 59, 999);
+            const transactionsInPeriod = allTransactions.filter(t => { const d = new Date(t[1]); return d >= start && d <= end; });
+            const transactionsBeforePeriod = allTransactions.filter(t => new Date(t[1]) < start);
             
             let openingBalance = 0;
-            transactionsBeforePeriod.forEach(t => {
-                const amount = parseFloat(t[2]) || 0;
-                if (t[3] === 'Cash In') openingBalance += amount;
-                else openingBalance -= amount;
-            });
+            transactionsBeforePeriod.forEach(t => { const amount = parseFloat(t[2]) || 0; if (t[3] === 'Cash In') openingBalance += amount; else openingBalance -= amount; });
 
-            let totalIn = 0;
-            let totalOut = 0;
-
-            let reportHtml = `
-                <html><head><title>Petty Cash Report</title>
-                <script src="https://cdn.tailwindcss.com"><\/script>
-                <style> body { font-family: sans-serif; } @media print { .no-print { display: none; } } </style>
-                </head><body class="p-8">
-                <button onclick="window.print()" class="no-print fixed top-4 right-4 bg-blue-500 text-white py-2 px-4 rounded">Print Report</button>
-                <h1 class="text-3xl font-bold mb-2">Petty Cash Report</h1>
-                <p class="mb-6">Report for period: <strong>${startDate}</strong> to <strong>${endDate}</strong></p>
-                <div class="mb-4 p-4 bg-gray-100 rounded-lg">
-                    <p><strong>Opening Balance:</strong> RM ${openingBalance.toFixed(2)}</p>
-                </div>
-                <table class="min-w-full divide-y divide-gray-200 border">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Cash In (RM)</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Cash Out (RM)</th>
-                    </tr>
-                </thead><tbody class="bg-white divide-y divide-gray-200">`;
-
+            let totalIn = 0, totalOut = 0;
+            let reportHtml = `<html><head><title>Petty Cash Report</title><script src="https://cdn.tailwindcss.com"><\/script><style>body{font-family:sans-serif} @media print{.no-print{display:none}}</style></head><body class="p-8"><button onclick="window.print()" class="no-print fixed top-4 right-4 bg-blue-500 text-white py-2 px-4 rounded">Print</button><h1 class="text-3xl font-bold mb-2">Petty Cash Report</h1><p class="mb-6">Period: <strong>${startDate}</strong> to <strong>${endDate}</strong></p><div class="mb-4 p-4 bg-gray-100 rounded-lg"><p><strong>Opening Balance:</strong> RM ${openingBalance.toFixed(2)}</p></div><table class="min-w-full divide-y divide-gray-200 border"><thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Company</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Category</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">In (RM)</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Out (RM)</th></tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+            
             transactionsInPeriod.forEach(t => {
-                const [ts, date, amount, type, company, cat, payTo, desc, url] = t;
+                const [ts, date, amount, type, company, cat, payTo, desc] = t;
                 const cashIn = type === 'Cash In' ? (parseFloat(amount) || 0) : 0;
                 const cashOut = type === 'Cash Out' ? (parseFloat(amount) || 0) : 0;
-                totalIn += cashIn;
-                totalOut += cashOut;
-                reportHtml += `<tr>
-                    <td class="px-4 py-2 whitespace-nowrap">${new Date(date).toLocaleDateString('en-GB')}</td>
-                    <td class="px-4 py-2">${desc || ''} (Pay To: ${payTo || ''})</td>
-                    <td class="px-4 py-2">${company || ''}</td>
-                    <td class="px-4 py-2">${cat || ''}</td>
-                    <td class="px-4 py-2 text-right">${cashIn > 0 ? cashIn.toFixed(2) : '-'}</td>
-                    <td class="px-4 py-2 text-right">${cashOut > 0 ? cashOut.toFixed(2) : '-'}</td>
-                </tr>`;
+                totalIn += cashIn; totalOut += cashOut;
+                reportHtml += `<tr><td class="px-4 py-2">${new Date(date).toLocaleDateString('en-GB')}</td><td class="px-4 py-2">${desc||''} (Pay To: ${payTo||''})</td><td class="px-4 py-2">${company||''}</td><td class="px-4 py-2">${cat||''}</td><td class="px-4 py-2 text-right">${cashIn > 0 ? cashIn.toFixed(2):'-'}</td><td class="px-4 py-2 text-right">${cashOut > 0 ? cashOut.toFixed(2):'-'}</td></tr>`;
             });
-            
-            const closingBalance = openingBalance + totalIn - totalOut;
 
-            reportHtml += `</tbody></table>
-                <div class="mt-4 p-4 bg-gray-100 rounded-lg">
-                    <p><strong>Total Cash In:</strong> RM ${totalIn.toFixed(2)}</p>
-                    <p><strong>Total Cash Out:</strong> RM ${totalOut.toFixed(2)}</p>
-                    <p class="font-bold">Closing Balance: RM ${closingBalance.toFixed(2)}</p>
-                </div>
-                <div class="mt-24 grid grid-cols-4 gap-8 text-center text-sm">
-                    <div><div class="border-t border-gray-400 pt-2">Prepared By</div><div class="font-bold">Admin</div></div>
-                    <div><div class="border-t border-gray-400 pt-2">Checked By</div><div class="font-bold">HOD</div></div>
-                    <div><div class="border-t border-gray-400 pt-2">Approved By</div><div class="font-bold">HR</div></div>
-                    <div><div class="border-t border-gray-400 pt-2">Verified By</div><div class="font-bold">Account</div></div>
-                </div>
-                <div class="mt-16 grid grid-cols-4 gap-8 text-center text-sm">
-                    <div class="col-start-2"><div class="border-t border-gray-400 pt-2">Consent By</div><div class="font-bold">Managing Partner</div></div>
-                </div>
-                </body></html>`;
-            
+            const closingBalance = openingBalance + totalIn - totalOut;
+            reportHtml += `</tbody></table><div class="mt-4 p-4 bg-gray-100 rounded-lg"><p><strong>Total In:</strong> RM ${totalIn.toFixed(2)}</p><p><strong>Total Out:</strong> RM ${totalOut.toFixed(2)}</p><p class="font-bold">Closing Balance: RM ${closingBalance.toFixed(2)}</p></div><div class="mt-24 grid grid-cols-4 gap-8 text-center text-sm"><div class="pt-12 border-t border-gray-400">Prepared By: Admin</div><div class="pt-12 border-t border-gray-400">Checked By: HOD</div><div class="pt-12 border-t border-gray-400">Approved By: HR</div><div class="pt-12 border-t border-gray-400">Verified By: Account</div></div><div class="mt-16 flex justify-center text-center text-sm"><div class="pt-12 border-t border-gray-400 w-1/4">Consent By: Managing Partner</div></div></body></html>`;
             const reportWindow = window.open("", "_blank");
-            reportWindow.document.write(reportHtml);
-            reportWindow.document.close();
+            reportWindow.document.write(reportHtml); reportWindow.document.close();
         }
 
-        // --- All other UI, Helper, and Charting functions from the previous version go here ---
-        function setLoadingState(isLoading, button = submitButton) { /* ... */ }
-        function populateDatalist(datalistElement, options) { /* ... */ }
-        function updateDashboard(transactions) { /* ... */ }
-        function populateTable(transactions) { /* ... */ }
-        function toggleAnalysisSection() { /* ... */ }
-        function showToast(message, isError = false) { /* ... */ }
-        function handleFetchError(error) { /* ... */ }
-        function renderCharts(transactions) { /* ... */ }
-        function processDataForPieChart(data, index) { /* ... */ }
-        function renderPieChart(chartInstance, canvasId, title, data, dataIndex) { /* ... */ }
-        function renderBarChart(chartInstance, canvasId, title, data) { /* ... */ }
+        function setLoadingState(isLoading, button = submitButton) {
+            const textEl = button.querySelector('span'); const loaderEl = button.querySelector('.loader');
+            button.disabled = isLoading;
+            if(textEl) textEl.style.display = isLoading ? 'none' : 'inline';
+            if(loaderEl) loaderEl.style.display = isLoading ? 'inline-block' : 'none';
+        }
+        function populateDatalist(datalistElement, options) { datalistElement.innerHTML = ''; options.forEach(o => { if(o){const e=document.createElement('option');e.value=o;datalistElement.appendChild(e)} }); }
+        function updateDashboard(transactions) { let t=0,o=0;transactions.forEach(r=>{const n=parseFloat(r[2])||0,s=r[3];"Cash In"===s?t+=n:"Cash Out"===s&&(o+=n)});currentBalanceEl.textContent=`RM ${(t-o).toFixed(2)}`;totalInEl.textContent=`RM ${t.toFixed(2)}`;totalOutEl.textContent=`RM ${o.toFixed(2)}`; }
+        function populateTable(transactions) { transactionLog.innerHTML = ''; if (transactions.length === 0) { noTransactionsMessage.classList.remove('hidden'); transactionTable.classList.add('hidden'); return; } noTransactionsMessage.classList.add('hidden'); transactionTable.classList.remove('hidden'); transactions.slice().reverse().forEach(t => { const [ts, date, amount, type, company, category, payTo, description, receiptUrl] = t; const row = transactionLog.insertRow(); row.dataset.timestamp = new Date(ts).toISOString(); const formattedDate = new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); row.innerHTML = `<td class="p-3 text-sm">${formattedDate}</td><td class="p-3 text-sm">${payTo||''}</td><td class="p-3 text-sm">${description||''}</td><td class="p-3 text-sm">${category||''}</td><td class="p-3 text-sm font-medium ${type==='Cash In'?'text-green-600':'text-red-600'}">RM ${(parseFloat(amount)||0).toFixed(2)}</td><td class="p-3 text-sm"></td><td class="p-3 text-sm"></td>`; if (receiptUrl) { const btn = document.createElement('button'); btn.textContent = 'View'; btn.className = 'text-indigo-600 hover:text-indigo-900'; btn.onclick = () => { if (receiptUrl.includes('uc?export=view')) { receiptModal.classList.remove('hidden'); modalImage.src = receiptUrl; } else { window.open(receiptUrl, '_blank'); } }; row.cells[5].appendChild(btn); } const delBtn = document.createElement('button'); delBtn.innerHTML = `<svg class="w-5 h-5 text-red-500 hover:text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`; delBtn.onclick = () => { rowToDelete = row; deleteConfirmModal.classList.remove('hidden'); }; row.cells[6].appendChild(delBtn); }); }
+        function toggleAnalysisSection() { const isHidden = analysisCharts.classList.toggle('hidden'); toggleAnalysisIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)'; }
+        function showToast(message, isError = false) { toastMessage.textContent = message; toast.className = `fixed bottom-5 right-5 p-4 rounded-lg shadow-lg text-white ${isError ? 'bg-red-600' : 'bg-gray-800'}`; setTimeout(() => { toast.classList.add('hidden'); }, 3000); }
+        function handleFetchError(error) { console.error('Fetch Error:', error); showToast('Could not fetch data.', true); noTransactionsMessage.textContent = 'Error loading transactions.'; noTransactionsMessage.classList.remove('hidden'); }
+        function renderCharts(transactions) { const expenseData = transactions.filter(t => t[3] === 'Cash Out'); renderPieChart('categoryChart', 'Expenses by Category', expenseData, 5); renderPieChart('companyChart', 'Expenses by Company', expenseData, 4); renderBarChart('monthlyExpenseChart', 'Monthly Expenses', expenseData); }
+        function processDataForPieChart(data, index) { const summary = data.reduce((acc, row) => { const key = row[index] || 'Uncategorized'; const amount = parseFloat(row[2]) || 0; acc[key] = (acc[key] || 0) + amount; return acc; }, {}); return { labels: Object.keys(summary), data: Object.values(summary) }; }
+        function renderPieChart(canvasId, title, data, dataIndex) {
+            let chartInstance = Chart.getChart(canvasId);
+            if (chartInstance) chartInstance.destroy();
+            const { labels, data: values } = processDataForPieChart(data, dataIndex);
+            new Chart(document.getElementById(canvasId).getContext('2d'), { type: 'pie', data: { labels, datasets: [{ data: values, backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#8A2BE2'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: title } } } });
+        }
+        function renderBarChart(canvasId, title, data) {
+            let chartInstance = Chart.getChart(canvasId);
+            if (chartInstance) chartInstance.destroy();
+            const monthlyData = data.reduce((acc, row) => { const month = new Date(row[1]).toLocaleString('default', { month: 'short', year: 'numeric' }); const amount = parseFloat(row[2]) || 0; acc[month] = (acc[month] || 0) + amount; return acc; }, {});
+            const sortedMonths = Object.keys(monthlyData).sort((a,b) => new Date(a) - new Date(b));
+            const sortedValues = sortedMonths.map(month => monthlyData[month]);
+            new Chart(document.getElementById(canvasId).getContext('2d'), { type: 'bar', data: { labels: sortedMonths, datasets: [{ label: 'Total Expenses', data: sortedValues, backgroundColor: '#36A2EB' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title } } } });
+        }
     </script>
 </body>
 </html>
